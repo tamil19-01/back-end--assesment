@@ -1,0 +1,297 @@
+
+## 1. What is Express.js and why is it used?
+
+Express.js is a lightweight web framework for Node.js used to build REST APIs and web servers.
+It simplifies routing, middleware handling, request/response processing, and server setup.
+
+**Why used**
+
+* Minimal boilerplate
+* Fast API development
+* Middleware support
+* Routing system
+* Works well with MongoDB
+
+---
+
+## 2. What is middleware? Explain with example.
+
+Middleware is a function that runs between request and response.
+It can modify request, check authentication, log data, or handle errors.
+
+Example:
+
+```js
+const logger = (req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+};
+
+app.use(logger);
+```
+
+---
+
+## 3. Difference between `app.use()` and `app.get()`
+
+| app.use()                 | app.get()               |
+| ------------------------- | ----------------------- |
+| Runs for all HTTP methods | Runs only for GET       |
+| Used for middleware       | Used for specific route |
+| Example: auth check       | Example: fetch data     |
+
+---
+
+## 4. What is route-level middleware?
+
+Middleware applied only to a specific route.
+
+```js
+const auth = (req,res,next)=>{ next(); };
+
+app.get("/profile", auth, (req,res)=>{
+  res.send("profile");
+});
+```
+
+---
+
+## 5. How do you handle errors globally in Express?
+
+Create error middleware:
+
+```js
+app.use((err, req, res, next) => {
+  res.status(500).json({
+    message: err.message
+  });
+});
+```
+
+Call `next(error)` from controllers.
+
+---
+
+## 6. Difference between `req.params`, `req.query`, `req.body`
+
+| Type       | Example URL   | Use          |
+| ---------- | ------------- | ------------ |
+| req.params | /users/:id    | Route param  |
+| req.query  | /users?page=1 | Query string |
+| req.body   | POST JSON     | Request body |
+
+---
+
+## 7. How do you protect routes using middleware?
+
+Create auth middleware:
+
+```js
+const auth = (req,res,next)=>{
+  if(!req.headers.token){
+    return res.status(401).json({msg:"Unauthorized"});
+  }
+  next();
+};
+
+app.get("/dashboard", auth, controller);
+```
+
+---
+
+## 8. What is CORS and why required?
+
+CORS = Cross Origin Resource Sharing.
+Allows frontend (different domain/port) to access backend.
+
+Without CORS, browser blocks requests.
+
+```js
+const cors = require("cors");
+app.use(cors());
+```
+
+---
+
+## 9. Difference: REST API vs traditional routing
+
+| REST API              | Traditional                  |
+| --------------------- | ---------------------------- |
+| Returns JSON          | Returns HTML                 |
+| Stateless             | Session-based                |
+| Used by frontend apps | Used by server-rendered apps |
+
+---
+
+## 10. How does Express handle async errors?
+
+Async errors must be passed to `next()` or caught with try/catch.
+
+```js
+const getData = async (req,res,next)=>{
+  try{
+    const data = await Model.find();
+    res.json(data);
+  }catch(err){
+    next(err);
+  }
+};
+```
+
+---
+
+# 🔷 MONGODB QUESTIONS
+
+## 1. What is MongoDB?
+
+MongoDB is a NoSQL database that stores data as JSON-like documents (BSON).
+Schema is flexible and scalable.
+
+---
+
+## 2. Difference between SQL and MongoDB
+
+| SQL          | MongoDB         |
+| ------------ | --------------- |
+| Tables       | Collections     |
+| Rows         | Documents       |
+| Fixed schema | Flexible schema |
+| JOIN         | $lookup         |
+
+---
+
+## 3. What is ObjectId?
+
+Unique identifier automatically generated for each MongoDB document.
+
+Example:
+
+```
+652d1f9b2a9c...
+```
+
+---
+
+## 4. What is indexing and why important?
+
+Index improves query performance by allowing fast search.
+
+```js
+db.users.createIndex({email:1})
+```
+
+Without index → full collection scan.
+
+---
+
+## 5. What is aggregation pipeline?
+
+A framework to process data in stages.
+
+Example stages:
+
+* $match
+* $group
+* $sort
+* $lookup
+
+---
+
+## 6. What is `$match` stage?
+
+Filters documents (like WHERE in SQL).
+
+```js
+{$match: {courseId: id}}
+```
+
+---
+
+## 7. What is `$group` stage?
+
+Groups documents and performs calculations.
+
+```js
+{
+ $group:{
+   _id:"$course",
+   total:{$sum:1}
+ }
+}
+```
+
+---
+
+## 8. What is `$lookup`?
+
+Used for joining collections.
+
+```js
+{
+ $lookup:{
+   from:"courses",
+   localField:"course",
+   foreignField:"_id",
+   as:"courseDetails"
+ }
+}
+```
+
+---
+
+## 9. Difference between `find()` and `aggregate()`
+
+| find()                 | aggregate()        |
+| ---------------------- | ------------------ |
+| Simple query           | Complex pipeline   |
+| No grouping            | Supports grouping  |
+| Fast for basic queries | Used for analytics |
+
+---
+
+## 10. Advantages of MongoDB
+
+* Flexible schema
+* High performance
+* Easy scaling
+* JSON format
+* Good for real-time apps
+
+---
+
+# 🔷 PROJECT ARCHITECTURE EXPLANATION (for interview)
+
+## Models
+
+* Student
+* Course
+* Enrollment
+* Attendance
+
+## Flow
+
+1. Create student
+2. Create course
+3. Enroll student
+4. Mark attendance
+5. Generate reports
+
+---
+
+# 🔷 Aggregation Logic Explanation
+
+## Top courses aggregation
+
+* group by course
+* count students
+* multiply fee
+* sort
+* limit 3
+
+## Attendance report
+
+* match course
+* group by student
+* count present days
+* calculate percentage
+
